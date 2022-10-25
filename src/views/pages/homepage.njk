@@ -1,0 +1,34 @@
+{% extends "layouts/root.njk" %}
+
+{% from "breadcrumbs/macro.njk" import govukBreadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ govukBreadcrumbs({
+        items: [
+            {
+                text: "Home",
+                href: "/"
+            }
+        ]
+    }) }}
+{% endblock %}
+
+{% block content_body %}
+    <h1 class="govuk-heading-xl">Non working days calendar</h1>
+
+    <p>
+        Welcome to a simple test site for viewing and performing simple management operations on
+        a non-working day calendar application.
+    </p>
+
+    <p>
+        The calendar will, by default, display the year ahead with any non-working day (i.e.
+        weekends and bank holidays) greyed out.
+    </p>
+
+    <p>
+        On the other hand, a user that logs in will be able to track their specific calendar and
+        add or remove working days as required.
+    </p>
+
+{% endblock %}
