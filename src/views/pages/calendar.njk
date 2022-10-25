@@ -1,0 +1,20 @@
+{% extends "layouts/calendar.njk" %}
+
+{% set admin_view = false %}
+
+{% from "breadcrumbs/macro.njk" import govukBreadcrumbs %}
+
+{% block breadcrumbs %}
+    {{ govukBreadcrumbs({
+        items: [
+            {
+                text: "Home",
+                href: "/"
+            },
+            {
+                text: "My calendar",
+                href: "/calendar"
+            }
+        ]
+    }) }}
+{% endblock %}

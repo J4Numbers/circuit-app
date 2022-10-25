@@ -1,0 +1,8 @@
+enum ActionEnums {
+  VIEW_HOMEPAGE = 'VIEW_HOMEPAGE',
+  VIEW_CALENDAR = 'VIEW_CALENDAR',
+  VIEW_MANAGER = 'VIEW_MANAGER',
+  UPDATE_MANAGER = 'UPDATE_MANAGER',
+}
+
+export default ActionEnums;

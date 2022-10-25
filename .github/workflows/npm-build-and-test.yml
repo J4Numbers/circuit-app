@@ -1,0 +1,119 @@
+name: NodeJS build and test
+
+on: push
+
+env:
+  default_node_version: 16.x
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ env.default_node_version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.default_node_version }}
+
+    - name: Build
+      run: |
+        npm install
+        npm run build
+
+    - name: Upload public build artefacts
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-public
+        # A file, directory or wildcard pattern that describes what to upload
+        path: public
+        # The desired behavior if no files are found using the provided path.
+        if-no-files-found: error
+        retention-days: 1
+
+    - name: Upload TS build artefacts
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-ts
+        # A file, directory or wildcard pattern that describes what to upload
+        path: src/js
+        # The desired behavior if no files are found using the provided path.
+        if-no-files-found: error
+        retention-days: 1
+
+  lint:
+    runs-on: ubuntu-latest
+
+    needs: build
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download public build artefacts
+      uses: actions/download-artifact@v2.1.0
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-public
+        # Destination path
+        path: public
+
+    - name: Download TS build artefacts
+      uses: actions/download-artifact@v2.1.0
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-ts
+        # Destination path
+        path: src/js
+
+    - name: Use Node.js ${{ env.default_node_version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.default_node_version }}
+
+    - name: Perform lint checks
+      run: |
+        npm i
+        npm run quality:eslint
+
+  test:
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    strategy:
+      matrix:
+        test-strategy: [js, ts, browser]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download public build artefacts
+      uses: actions/download-artifact@v2.1.0
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-public
+        # Destination path
+        path: public
+
+    - name: Download TS build artefacts
+      uses: actions/download-artifact@v2.1.0
+      with:
+        # Artifact name
+        name: npm-gulp-build-files-ts
+        # Destination path
+        path: src/js
+
+    - name: Use Node.js ${{ env.default_node_version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.default_node_version }}
+
+    - name: Perform tests
+      run: |
+        npm i
+        npm run regenerate-certs
+        npm run test:${{ matrix.test-strategy }}

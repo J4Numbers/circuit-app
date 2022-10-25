@@ -1,0 +1,12 @@
+### Project files
+/node_modules/
+/certs/
+/data/
+
+/.stryker-tmp/
+
+### Generated files
+/src/js/
+/public/
+/reports/
+/package/
