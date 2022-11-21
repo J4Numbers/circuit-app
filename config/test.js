@@ -71,6 +71,7 @@ module.exports = {
   authorisation: {
     default: {
       allow: [
+        'CAN_LOGIN',
         'VIEW_HOMEPAGE',
         'VIEW_CALENDAR',
       ],

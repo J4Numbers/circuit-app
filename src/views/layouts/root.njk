@@ -126,10 +126,10 @@
 {% block footer %}
     {% if not userSession.anonymous %}
         {% set login_link="/logout" %}
-        {% set login_text="Logout" %}
+        {% set login_text="Log out" %}
     {% else %}
         {% set login_link="/login" %}
-        {% set login_text="Login" %}
+        {% set login_text="Log in" %}
     {% endif %}
     {{ govukFooter({
         containerClasses: "app-width-container",

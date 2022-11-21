@@ -12,12 +12,12 @@ const checkUserAlreadyLoggedIn = async (req, res, next) => {
     req.log.debug('Testing if current user is already logged in...');
     if (await authorisationChecker.isAuthorised(
       res.nunjucks.userSession.userIdent,
-      ActionEnums.VIEW_MANAGER,
+      ActionEnums.CAN_LOGIN,
     )) {
-      req.log.debug('User was already logged in. Redirecting to homepage...');
-      res.redirect(303, '/', next);
+      req.log.debug('User is allowed to log in.');
     } else {
-      req.log.debug('User was not logged in.');
+      req.log.debug('User is not authorised to log in. Redirecting to homepage...');
+      res.redirect(303, '/', next);
     }
   } catch (e) {
     req.log.warn(`Unable to check authorisation of user :: ${e.message}`);
