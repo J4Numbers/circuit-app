@@ -1,0 +1,60 @@
+{% extends "layouts/root.njk" %}
+
+{% from "error-summary/macro.njk" import govukErrorSummary %}
+
+{% block content_body %}
+    <h1 class="govuk-heading-xl">My calendar - {{ this_year }} {% if admin_view %} - Manager view{% endif %}</h1>
+
+    <p>
+        This is a list of all holidays that your calendar currently contains, including a list
+        of all weekends and bank holidays (gathered from
+        <a href="https://gov.uk/bank-holidays">https://gov.uk/bank-holidays</a>).
+    </p>
+
+    {% if admin_view %}
+        <div class="govuk-inset-text">
+            <p>
+                This is the manager view of the calendar, where you can create new holiday reservations
+                or remove existing ones.
+            </p>
+            <a href="/manager/add" class="govuk-button govuk-button--start"
+               id="holiday-add-start">Add new holiday</a>
+        </div>
+    {% endif %}
+
+    {% if errors %}
+        {{ govukErrorSummary({
+            titleText: "There was a problem",
+            errorList: errors | errorfyList
+        }) }}
+    {% endif %}
+
+    {% for holiday in holidays %}
+        {% if loop.index0 % 3 == 0 %}
+            <div class="govuk-grid-row">
+        {% endif %}
+        <div class="govuk-grid-column-one-third">
+            <div class="govuk-panel calendar-date {% if holiday.bunting %}bunting-calendar-date{% endif %}"
+                 id="calendar-date-{{ holiday.date | formatDate('YYYY-MM-DD') }}">
+                <p class="govuk-heading-m govuk-panel__title">{{ holiday.date | formatDate('YYYY-MM-DD') }}</p>
+                <div class="govuk-panel__body">
+                    <p class="govuk-body-s">{{ holiday.title }}</p>
+                    <p class="govuk-body">{{ holiday.notes }}</p>
+                    {% if admin_view %}
+                        <div class="govuk-body">
+                            <button class="govuk-button govuk-button--warning govuk-!-margin-bottom-0"
+                                    onclick="removeDayFromCalendar('{{ holiday.date | formatDate('YYYY-MM-DD') }}')"
+                                    id="calendar-date-{{ holiday.date | formatDate('YYYY-MM-DD') }}-remove">
+                                Remove
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% if loop.index0 % 3 == 2 or loop.last %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "layouts/root.njk" %}
+
+{% from "breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "error-summary/macro.njk" import govukErrorSummary %}
+{% from "input/macro.njk" import govukInput %}
+
+{% block breadcrumbs %}
+    {{ govukBreadcrumbs({
+        items: [
+            {
+                text: "Home",
+                href: "/"
+            },
+            {
+                text: 'Login',
+                href: '/login'
+            }
+        ]
+    }) }}
+{% endblock %}
+
+{% block content_body %}
+    <h1 class="govuk-heading-xl">Log in</h1>
+
+    {% if errors %}
+        {{ govukErrorSummary({
+            titleText: "There was a problem",
+            errorList: errors | errorfyList
+        }) }}
+    {% endif %}
+
+    <form action="/login" method="post">
+
+        <div class="{% if errors['login'] %}govuk-form-group--error{% endif %}" id="login">
+
+            {% if errors['login-name'] %}
+                {{ govukInput({
+                    label: {
+                        text: "Enter your username",
+                        classes: "govuk-label--m"
+                    },
+                    id: 'login-name',
+                    name: 'login-name',
+                    classes: 'govuk-!-width-one-third',
+                    errorMessage: {
+                        text: errors['login-name']
+                    }
+                }) }}
+            {% else %}
+                {{ govukInput({
+                    label: {
+                        text: "Enter your username",
+                        classes: "govuk-label--m"
+                    },
+                    id: 'login-name',
+                    name: 'login-name',
+                    classes: 'govuk-!-width-one-third'
+                }) }}
+            {% endif %}
+
+            {% if errors['login-password'] %}
+                {{ govukInput({
+                    label: {
+                        text: "Enter your password",
+                        classes: "govuk-label--m"
+                    },
+                    id: 'login-password',
+                    name: 'login-password',
+                    type: 'password',
+                    classes: 'govuk-!-width-one-third',
+                    errorMessage: {
+                        text: errors['login-password']
+                    }
+                }) }}
+            {% else %}
+                {{ govukInput({
+                    label: {
+                        text: "Enter your password",
+                        classes: "govuk-label--m"
+                    },
+                    id: 'login-password',
+                    name: 'login-password',
+                    type: 'password',
+                    classes: 'govuk-!-width-one-third'
+                }) }}
+            {% endif %}
+
+        </div>
+
+        <input id="login-submit" type="submit" class="govuk-button" value="Log in" />
+    </form>
+
+{% endblock %}
