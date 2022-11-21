@@ -1,0 +1,44 @@
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+
+name: Build and deploy image to GHCR
+
+jobs:
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Downcase important variables
+        id: downcase-variables
+        run: |
+          echo "REPO_HOST=ghcr.io" >>${GITHUB_ENV}
+          echo "REPO_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+          echo "IMAGE_TAG=${GITHUB_SHA,,}" >>${GITHUB_ENV}
+          echo "REF_TAG=${GITHUB_REF_NAME,,}" >>${GITHUB_ENV}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build, tag, and push image to GitHub Container Registry
+        id: build-deploy-image
+        run: |
+          docker build -t $REPO_HOST/$REPO_NAME:latest\
+            -t $REPO_HOST/$REPO_NAME:$IMAGE_TAG\
+            -t $REPO_HOST/$REPO_NAME:$REF_TAG .
+          docker push $REPO_HOST/$REPO_NAME:latest
+          docker push $REPO_HOST/$REPO_NAME:$IMAGE_TAG
+          docker push $REPO_HOST/$REPO_NAME:$REF_TAG
+          echo "::set-output name=image::$REPO_HOST/$REPO_NAME:$REF_TAG"
