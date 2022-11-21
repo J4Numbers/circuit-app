@@ -2,13 +2,26 @@ const sessionManager = require('../../../../../src/js/session-management').defau
 
 describe('The login internal page', function () {
   describe('Visiting the login page', function () {
-    it('Should load the login page on visiting', function () {
+    it('Should redirect a new user to the homepage', function () {
       return request(server())
         .get('/login')
         .then((response) => {
           expect(response).to.have.status(200);
           expect(response).to.be.html;
+          expect(response).to.redirectTo(/^http(s?):\/\/([^/]+)\/$/);
         });
+    });
+
+    it('Should load correctly to an anonymous user who has already got a session', function () {
+      return sessionManager.generateSession(global.generateAnonUserIdent())
+        .then((sessionToken) => request(server())
+          .get('/login')
+          .set('cookie', `user-session=${sessionToken}`)
+          .then((response) => {
+            expect(response).to.have.status(200);
+            expect(response).to.be.html;
+            expect(response).to.not.redirect;
+          }));
     });
 
     it('Should redirect a logged in user to the homepage', function () {
@@ -41,31 +54,35 @@ describe('The login internal page', function () {
     });
 
     it('Should redirect back to the login page on an empty login', function () {
-      return request(server())
-        .post('/login')
-        .send({
-          'login-name': '',
-          'login-password': '',
-        })
-        .then((response) => {
-          expect(response).to.have.status(200);
-          expect(response).to.be.html;
-          expect(response).to.not.redirect;
-        });
+      return sessionManager.generateSession(global.generateAnonUserIdent())
+        .then((sessionToken) => request(server())
+          .post('/login')
+          .set('cookie', `user-session=${sessionToken}`)
+          .send({
+            'login-name': '',
+            'login-password': '',
+          })
+          .then((response) => {
+            expect(response).to.have.status(200);
+            expect(response).to.be.html;
+            expect(response).to.not.redirect;
+          }));
     });
 
     it('Should redirect back to the login page on a failed login', function () {
-      return request(server())
-        .post('/login')
-        .send({
-          'login-name': 'username',
-          'login-password': 'failed-password',
-        })
-        .then((response) => {
-          expect(response).to.have.status(200);
-          expect(response).to.be.html;
-          expect(response).to.not.redirect;
-        });
+      return sessionManager.generateSession(global.generateAnonUserIdent())
+        .then((sessionToken) => request(server())
+          .post('/login')
+          .set('cookie', `user-session=${sessionToken}`)
+          .send({
+            'login-name': 'username',
+            'login-password': 'failed-password',
+          })
+          .then((response) => {
+            expect(response).to.have.status(200);
+            expect(response).to.be.html;
+            expect(response).to.not.redirect;
+          }));
     });
   });
 
