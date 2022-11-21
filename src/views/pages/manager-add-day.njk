@@ -1,0 +1,192 @@
+{% extends "layouts/root.njk" %}
+
+{% from "breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "error-summary/macro.njk" import govukErrorSummary %}
+{% from "input/macro.njk" import govukInput %}
+{% from "radios/macro.njk" import govukRadios %}
+
+{% block breadcrumbs %}
+    {{ govukBreadcrumbs({
+        items: [
+            {
+                text: "Home",
+                href: "/"
+            },
+            {
+                text: "Calendar manager",
+                href: "/manager"
+            },
+            {
+                text: "Add new holiday",
+                href: "/manager/add"
+            }
+        ]
+    }) }}
+{% endblock %}
+
+{% block content_body %}
+    <h1 class="govuk-heading-xl">My calendar - {{ this_year }} - Add new holiday</h1>
+
+    <p>
+        This portal exists to allow you to reserve a new holiday for {{ this_year }}. Please
+        fill in the fields below to the best of your knowledge.
+    </p>
+
+    {% if errors %}
+        {{ govukErrorSummary({
+            titleText: "There was a problem",
+            errorList: errors | errorfyList
+        }) }}
+    {% endif %}
+
+    <form action="/manager/add" method="post">
+        {% if errors['holiday-title'] %}
+            {{ govukInput({
+                label: {
+                    text: "Enter a title for this holiday",
+                    classes: "govuk-label--m"
+                },
+                id: "holiday-title",
+                name: "holiday-title",
+                classes: "govuk-!-width-two-thirds",
+                errorMessage: {
+                    text: errors['holiday-title']
+                },
+                value: body['holiday-title']
+            }) }}
+        {% else %}
+            {{ govukInput({
+                label: {
+                    text: "Enter a title for this holiday",
+                    classes: "govuk-label--m"
+                },
+                id: "holiday-title",
+                name: "holiday-title",
+                classes: "govuk-!-width-two-thirds",
+                value: body['holiday-title']
+            }) }}
+        {% endif %}
+
+        {% if errors['holiday-date'] %}
+            {{ govukInput({
+                label: {
+                    text: "Enter the date of this holiday",
+                    classes: "govuk-label--m"
+                },
+                hint: {
+                    text: 'The date should be formatted as a calendar date in the ISO 8601 format (YYYY-MM-DD)'
+                },
+                id: "holiday-date",
+                name: "holiday-date",
+                classes: "govuk-!-width-two-thirds",
+                errorMessage: {
+                    text: errors['holiday-date']
+                },
+                value: body['holiday-date']
+            }) }}
+        {% else %}
+            {{ govukInput({
+                label: {
+                    text: "Enter the date of this holiday",
+                    classes: "govuk-label--m"
+                },
+                hint: {
+                    text: 'The date should be formatted as a calendar date in the ISO 8601 format (YYYY-MM-DD)'
+                },
+                id: "holiday-date",
+                name: "holiday-date",
+                classes: "govuk-!-width-two-thirds",
+                value: body['holiday-date']
+            }) }}
+        {% endif %}
+
+        {% if errors['holiday-notes'] %}
+            {{ govukInput({
+                label: {
+                    text: "Enter any notes for this holiday",
+                    classes: "govuk-label--m"
+                },
+                hint: {
+                    text: "(Optional)"
+                },
+                id: "holiday-notes",
+                name: "holiday-notes",
+                classes: "govuk-!-width-two-thirds",
+                errorMessage: {
+                    text: errors['holiday-notes']
+                },
+                value: body['holiday-notes']
+            }) }}
+        {% else %}
+            {{ govukInput({
+                label: {
+                    text: "Enter any notes for this holiday",
+                    classes: "govuk-label--m"
+                },
+                hint: {
+                    text: "(Optional)"
+                },
+                id: "holiday-notes",
+                name: "holiday-notes",
+                classes: "govuk-!-width-two-thirds",
+                value: body['holiday-notes']
+            }) }}
+        {% endif %}
+
+        {% if errors['holiday-bunting'] %}
+            {{ govukRadios({
+                fieldset: {
+                    legend: {
+                        text: "Will bunting be required for this holiday?",
+                        isPageHeading: false,
+                        classes: "govuk-fieldset__legend--m"
+                    }
+                },
+                id: "holdiay-bunting",
+                name: "holiday-bunting",
+                classes: "govuk-radios--inline",
+                errorMessage: {
+                    text: errors['holiday-bunting']
+                },
+                items: [
+                    {
+                        value: "yes",
+                        text: "Yes"
+                    },
+                    {
+                        value: "no",
+                        checked: true,
+                        text: "No"
+                    }
+                ]
+            }) }}
+        {% else %}
+            {{ govukRadios({
+                fieldset: {
+                    legend: {
+                        text: "Will bunting be required for this holiday?",
+                        isPageHeading: false,
+                        classes: "govuk-fieldset__legend--m"
+                    }
+                },
+                id: "holdiay-bunting",
+                name: "holiday-bunting",
+                classes: "govuk-radios--inline",
+                items: [
+                    {
+                        value: "yes",
+                        text: "Yes"
+                    },
+                    {
+                        value: "no",
+                        checked: true,
+                        text: "No"
+                    }
+                ]
+            }) }}
+        {% endif %}
+
+        <input type="submit" class="govuk-button" id="holiday-submit"
+               value="Add new holiday" />
+    </form>
+{% endblock %}

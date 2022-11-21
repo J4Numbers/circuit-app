@@ -1,0 +1,13 @@
+.idea
+.nyc_output
+coverage
+data
+test
+
+*eslint*
+.dockerignore
+.gitlab-ci.yml
+docker-compose.yml
+*Dockerfile
+nyc*
+sonar-project.properties

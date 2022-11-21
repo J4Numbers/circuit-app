@@ -1,0 +1,32 @@
+{% extends "layouts/root.njk" %}
+
+{% from "breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "error-summary/macro.njk" import govukErrorSummary %}
+
+{% block titleAddendum %}
+    - {{ error.statusCode }} :: {{ error.message }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ govukBreadcrumbs({
+        items: [
+            {
+                text: "Home",
+                href: "/"
+            }, {
+                text: error.message
+            }
+        ]
+    }) }}
+{% endblock %}
+
+{% block content_body %}
+    <h1 class="govuk-heading-xl">{{ error.statusCode }} - {{ error.message }}</h1>
+
+    {% if errors %}
+        {{ govukErrorSummary({
+            titleText: "There was a problem",
+            errorList: errors | errorfyList
+        }) }}
+    {% endif %}
+{% endblock %}
