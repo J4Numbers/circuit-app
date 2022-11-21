@@ -16,10 +16,15 @@ RUN npm set registry "https://registry.npmjs.org" &&\
 FROM node:16-alpine as stage
 WORKDIR /usr/src/app
 COPY --from=install /usr/src/app/node_modules/   node_modules/
+RUN true
 COPY --from=compile /usr/src/app/config/         config/
+RUN true
 COPY --from=compile /usr/src/app/public/         public/
+RUN true
 COPY --from=compile /usr/src/app/src/            src/
+RUN true
 COPY --from=compile /usr/src/app/src/js/         src/js/
+RUN true
 COPY --from=compile /usr/src/app/package*.json   ./
 
 # Stage 4 - final copy!

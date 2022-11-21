@@ -117,3 +117,11 @@ jobs:
         npm i
         npm run regenerate-certs
         npm run test:${{ matrix.test-strategy }}
+
+  build-and-deploy-ghcr:
+    if: github.ref_name == 'develop'
+    needs:
+      - test
+    uses: ./.github/workflows/build-deploy-image.yml
+    with:
+      env: production
