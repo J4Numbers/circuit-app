@@ -60,7 +60,7 @@ const doLogin = async (req, res, next) => {
       res.nunjucks.userSession = await sessionManager.getSession(res.cookies['user-session']);
     } catch (e) {
       req.log.warn(`Unable to authenticate the user :: ${e}`);
-      res.locals.errors.login = `There was an error while authenticating the User. ${e}`;
+      res.locals.errors.login = e.message;
     }
   }
   next();
