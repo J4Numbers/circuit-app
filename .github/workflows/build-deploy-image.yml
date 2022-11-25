@@ -35,4 +35,4 @@ jobs:
           docker push $REPO_HOST/$REPO_NAME:latest
           docker push $REPO_HOST/$REPO_NAME:$IMAGE_TAG
           docker push $REPO_HOST/$REPO_NAME:$REF_TAG
-          echo "::set-output name=image::$REPO_HOST/$REPO_NAME:$REF_TAG"
+          echo "name=image::$REPO_HOST/$REPO_NAME:$REF_TAG" >> ${GITHUB_OUTPUT}

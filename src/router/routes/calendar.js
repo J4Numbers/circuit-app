@@ -6,6 +6,15 @@ const renderer = require('../../js/renderer/nunjucks-renderer').default();
 const authorisationChecker = require('../../js/authorisation').default();
 const utils = require('./utils');
 
+/**
+ * Check whether the user is allowed to view the calendar (which they are
+ * usually except for if they're completely new to the site).
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const isUserAuthorisedToViewPage = async (req, res, next) => {
   res.locals.errors = {};
   try {
@@ -21,6 +30,15 @@ const isUserAuthorisedToViewPage = async (req, res, next) => {
   next();
 };
 
+/**
+ * Get the personal holidays associated with a given user, sorted from earliest
+ * to latest.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions have been completed.
+ */
 const loadAvailableHolidays = async (req, res, next) => {
   try {
     const holidays = await res.nunjucks.userSession.holidayManager.getAllHolidays();
@@ -42,6 +60,14 @@ const loadAvailableHolidays = async (req, res, next) => {
   }
 };
 
+/**
+ * Fill in the data model that is going to be used to populate the view
+ * screen with user data.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const buildModel = (req, res, next) => {
   res.locals.render = {};
   res.locals.render.auth_list = res.locals.authList;
@@ -51,6 +77,14 @@ const buildModel = (req, res, next) => {
   next();
 };
 
+/**
+ * Render the view page with all the data we have built up throughout
+ * this journey.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const renderResponse = (req, res, next) => {
   res.contentType = 'text/html';
   res.header('content-type', 'text-html');
@@ -62,6 +96,12 @@ const renderResponse = (req, res, next) => {
   next();
 };
 
+/**
+ * Load in the calendar endpoint to the server.
+ *
+ * @param {object} server - The server object that we are slowly fleshing
+ * out.
+ */
 module.exports = (server) => {
   server.get(
     '/calendar',

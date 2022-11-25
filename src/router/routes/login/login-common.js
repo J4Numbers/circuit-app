@@ -7,6 +7,19 @@ const holidayManagerGenerator = require('../../../js/calendar-management').defau
 const ActionEnums = require('../../../js/objects/action-enums').default;
 const Divisions = require('../../../js/objects/calendar/divisions').default;
 
+/**
+ * Given a user ident, we want to check whether a user is still allowed
+ * to log in to the system, which we can do by checking whether the user
+ * possesses the required action 'CAN_LOGIN'.
+ *
+ * If they can log in, we do nothing and continue processing, otherwise
+ * we kick them back to the homepage.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const checkUserAlreadyLoggedIn = async (req, res, next) => {
   try {
     req.log.debug('Testing if current user is already logged in...');
@@ -27,6 +40,19 @@ const checkUserAlreadyLoggedIn = async (req, res, next) => {
   next();
 };
 
+/**
+ * Attempt to log in the current user to the site. This is done in two stages:
+ * 1. Logging the user in via an authentication manager.
+ * 2. Generating the session for the user to be used from now on.
+ *
+ * The session contains whether they are an anonymous user, and their current
+ * holiday calendar, which the generator will work out for us.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const doLogin = async (req, res, next) => {
   if (res.authDetails !== undefined) {
     try {
@@ -66,6 +92,15 @@ const doLogin = async (req, res, next) => {
   next();
 };
 
+/**
+ * If no errors occurred during login, then we kick the user back to the
+ * homepage so that they can continue their journey. Otherwise, we show them
+ * the errors that have been accrued so far.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const redirectToHome = (req, res, next) => {
   if (Object.keys(res.locals.errors).length === 0) {
     req.log.debug('Login successful. Redirecting user to homepage...');
@@ -76,6 +111,15 @@ const redirectToHome = (req, res, next) => {
   }
 };
 
+/**
+ * When a user wants to log out, we do so by overriding their session cookie
+ * to be five minutes in the past, forcing it to expire and for their cookie
+ * to be regenerated on the next page.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const unsetCookie = (req, res, next) => {
   const date = new Date();
   date.setMinutes(-5);
@@ -87,6 +131,8 @@ const unsetCookie = (req, res, next) => {
   next();
 };
 
+// All of these are utility methods which are shared out for other files to
+// use, however they choose in their chains.
 module.exports = {
   checkUserAlreadyLoggedIn,
   doLogin,
