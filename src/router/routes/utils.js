@@ -2,7 +2,6 @@
 // A class containing re-usable code for the project
 // --------------
 const config = require('config');
-const { Request, Response, Next } = require('restify');
 const restifyErrors = require('restify-errors');
 const authorisationChecker = require('../../js/authorisation').default();
 const authenticationManager = require('../../js/authentication-management').default();
