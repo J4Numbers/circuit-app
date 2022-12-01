@@ -1,5 +1,3 @@
-const { Request, Response, Next } = require('restify');
-
 /**
  * If a user is able to reach this endpoint and to see a response, it is
  * up. Therefore, we can just print out a simple status for all requests.

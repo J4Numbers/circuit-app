@@ -6,6 +6,15 @@ const renderer = require('../../js/renderer/nunjucks-renderer').default();
 const authorisationChecker = require('../../js/authorisation').default();
 const utils = require('./utils');
 
+/**
+ * Check whether the user is allowed to view the calendar manager (which
+ * they are not usually except for if they're a full user).
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const isUserAuthorisedToViewPage = async (req, res, next) => {
   res.locals.errors = {};
   try {
@@ -21,6 +30,15 @@ const isUserAuthorisedToViewPage = async (req, res, next) => {
   next();
 };
 
+/**
+ * Check whether the user is allowed to modify the calendar manager (which
+ * they are not usually except for if they're a full user).
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const isUserAuthorisedToModifyPage = async (req, res, next) => {
   res.locals.errors = {};
   try {
@@ -36,11 +54,33 @@ const isUserAuthorisedToModifyPage = async (req, res, next) => {
   next();
 };
 
+/**
+ * Create a working variable in the response object (which is persisted between
+ * method chains - unlike the request object) that will contain any errors that
+ * we find during the processing of our requests.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const loadErrors = (req, res, next) => {
   res.locals.errors = {};
   next();
 };
 
+/**
+ * Load all the holidays that the user is currently planning on having into
+ * the local response to be passed on for future rendering. We also ensure that
+ * the response is sorted from earliest to latest.
+ *
+ * In the event of a failure at this stage, we will display a hard error page
+ * to the user.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const loadAvailableHolidays = async (req, res, next) => {
   try {
     const holidays = await res.nunjucks.userSession.holidayManager.getAllHolidays();
@@ -62,6 +102,21 @@ const loadAvailableHolidays = async (req, res, next) => {
   }
 };
 
+/**
+ * Validate all fields that we ask the user to fill in when adding a new date
+ * to their holiday calendar. This includes making sure that both the title
+ * and the actual date that is being added. Validation on the notes and the
+ * bunting field is not required due to the optional nature of the field, and
+ * the boolean nature of the field respectively.
+ *
+ * In the event that an error is found, we add the field 'name' attribute to
+ * the error object that we're passing down, and fill in the error that we're
+ * returning to be shown to the user in an error summary.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const validateDateAddition = (req, res, next) => {
   if (!Object.prototype.hasOwnProperty.call(req.body, 'holiday-date')
       || req.body['holiday-date'] === '') {
@@ -76,6 +131,20 @@ const validateDateAddition = (req, res, next) => {
   next();
 };
 
+/**
+ * Attempt to add a date to the calendar of the current user. On success, we
+ * will add a new 'toast' popup that will display the successful addition,
+ * otherwise a general error will be added to the page to be displayed to
+ * the user.
+ *
+ * Note: We only actually attempt the addition of a new day to the calendar
+ * if all validation checks passed okay.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const attemptDateAddition = async (req, res, next) => {
   if (Object.keys(res.locals.errors).length === 0) {
     try {
@@ -96,6 +165,17 @@ const attemptDateAddition = async (req, res, next) => {
   next();
 };
 
+/**
+ * Attempt to remove a date from the calendar of the current user. On success,
+ * we will add a new 'toast' popup that will display the successful removal,
+ * otherwise a general error will be added to the page to be displayed to
+ * the user.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ * @returns {Promise<void>} - When all actions are completed.
+ */
 const attemptDateRemoval = async (req, res, next) => {
   try {
     await res.nunjucks.userSession.holidayManager.removeOneHoliday(moment(req.params.dateToRemove));
@@ -109,6 +189,14 @@ const attemptDateRemoval = async (req, res, next) => {
   next();
 };
 
+/**
+ * Fill in the data model that is going to be used to populate the view
+ * screen with user data.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const buildModel = (req, res, next) => {
   res.locals.render = {};
   res.locals.render.auth_list = res.locals.authList;
@@ -118,6 +206,14 @@ const buildModel = (req, res, next) => {
   next();
 };
 
+/**
+ * Fill in the data model that is going to be used to populate the view
+ * screen with user data.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const buildCreateModel = (req, res, next) => {
   res.locals.render = {};
   res.locals.render.auth_list = res.locals.authList;
@@ -127,6 +223,15 @@ const buildCreateModel = (req, res, next) => {
   next();
 };
 
+/**
+ * If no errors were found during processing of a page, then redirect the
+ * user to the base manager page, otherwise we continue onwards to where
+ * the user can be shown their errors.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const redirectOnNoErrors = (req, res, next) => {
   if (Object.keys(res.locals.errors).length === 0) {
     res.redirect(303, '/manager', next);
@@ -135,6 +240,14 @@ const redirectOnNoErrors = (req, res, next) => {
   }
 };
 
+/**
+ * Render the normal response page for when a user is attempting to view
+ * their existing holiday calendar in manager mode.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const renderResponse = (req, res, next) => {
   res.contentType = 'text/html';
   res.header('content-type', 'text-html');
@@ -146,6 +259,14 @@ const renderResponse = (req, res, next) => {
   next();
 };
 
+/**
+ * Render the normal response page for when a user is attempting to create
+ * a new holiday within their calendar.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const renderCreateResponse = (req, res, next) => {
   res.contentType = 'text/html';
   res.header('content-type', 'text-html');
@@ -157,6 +278,14 @@ const renderCreateResponse = (req, res, next) => {
   next();
 };
 
+/**
+ * Render the page with any errors that were found during the journey
+ * of adding a new day to the site.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const renderCreateErrors = (req, res, next) => {
   res.contentType = 'text/html';
   res.header('content-type', 'text-html');
@@ -170,6 +299,14 @@ const renderCreateErrors = (req, res, next) => {
   next();
 };
 
+/**
+ * Render the page with any errors that were found when attempting to remove
+ * a day from a user's calendar.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {Next} next - The chain handler for passing on responsibility.
+ */
 const renderRemovalErrors = (req, res, next) => {
   res.contentType = 'text/html';
   res.header('content-type', 'text-html');
@@ -185,6 +322,8 @@ const renderRemovalErrors = (req, res, next) => {
 
 module.exports = (server) => {
   server.get(
+    // Getting the general manager page shows the user their calendar, but
+    // with the option to add or remove days.
     '/manager',
     isUserAuthorisedToViewPage,
     utils.getAuths,
@@ -192,6 +331,8 @@ module.exports = (server) => {
     buildModel,
     renderResponse,
   );
+  // Getting the add new holiday page allows the user to currently add in
+  // a single holiday day to their calendar.
   server.get(
     '/manager/add',
     isUserAuthorisedToViewPage,
@@ -199,6 +340,8 @@ module.exports = (server) => {
     buildCreateModel,
     renderCreateResponse,
   );
+  // Posting to the remove day page allows the user to remove a day from
+  // their calendar.
   server.post(
     '/manager/remove/:dateToRemove',
     isUserAuthorisedToModifyPage,
@@ -209,6 +352,8 @@ module.exports = (server) => {
     buildCreateModel,
     renderRemovalErrors,
   );
+  // Posting to the add new holiday page allows the user to submit their
+  // requested holiday and add it to their existing calendar.
   server.post(
     '/manager/add',
     isUserAuthorisedToModifyPage,
