@@ -1,4 +1,3 @@
-const { Request, Response, Next } = require('restify');
 const renderer = require('../../js/renderer/nunjucks-renderer').default();
 const utils = require('./utils');
 

@@ -7,7 +7,5 @@ module.exports = {
   exclude: [
     ...baseConfig.exclude,
     'src/ts',
-    'src/router/routes/login/login-internal.js',
-    'src/router/routes/login/login-localstack.js',
   ],
 };
